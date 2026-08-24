@@ -1,4 +1,4 @@
-# ⚡ Python Circuit Simulator & Schematic Parser
+# Python Circuit Simulator & Schematic Parser
 
 A Python-based electrical circuit simulator that can **analyze a circuit schematic image, convert it into a netlist, and solve the circuit automatically**.
 
