@@ -24,8 +24,7 @@ gray = cv2.cvtColor(
 )
 
 # IMPORTANT:
-# Define image dimensions early because we use
-# width/height during component classification.
+# Define image dimensions early
 height, width = gray.shape
 
 
@@ -149,7 +148,6 @@ def parse_value(text):
 
     except ValueError:
 
-        # Try extracting a number from bad OCR
         return extract_number(text)
 
 
@@ -237,12 +235,12 @@ for item in ocr_items:
     cx, cy = item["center"]
 
 
-    # Ignore obvious title text
+    # Ignore title
     if "TEST IMAGE" in text:
         continue
 
 
-    # Ignore voltage text if OCR got the V
+    # ignore voltage text
     if "V" in text.upper():
         continue
 
@@ -253,11 +251,6 @@ for item in ocr_items:
         continue
 
 
-    # Current test schematic assumption:
-    # resistor values are on the RIGHT half
-    # of the image.
-    #
-    # Voltage source is on LEFT half.
     if cx < width * 0.50:
         continue
 
@@ -269,15 +262,14 @@ for item in ocr_items:
     })
 
 
-# Sort from top to bottom
+# top to bottom
 resistors.sort(
     key=lambda resistor:
     resistor["center"][1]
 )
 
 
-# Automatically name:
-# R1, R2, R3...
+# R1, R2, ...
 for index, resistor in enumerate(
     resistors,
     start=1
@@ -326,8 +318,7 @@ for resistor in resistors:
     cy = int(cy)
 
 
-    # Search LEFT of resistor value text
-    # for the actual zig-zag symbol.
+    # Search LEFT of resistor value text for zigzag
     search_x1 = max(
         0,
         cx - 260
@@ -375,15 +366,12 @@ for resistor in resistors:
         )
 
 
-        # Ignore tiny objects
+        # ignore small things
         if w < 5 or h < 15:
             continue
 
 
-        # Current test circuit:
-        # resistors are vertical.
-        #
-        # Prefer tall narrow objects.
+        # Current test circuit --> resistors are vertical.
         score = (
             h
             -
@@ -405,7 +393,6 @@ for resistor in resistors:
 
     if best_box is None:
 
-        # Fallback region
         best_box = (
             max(
                 0,
@@ -1373,7 +1360,7 @@ def segments_intersect(
     )
 
 
-    # General intersection
+    # gen. intersection
     if (
         o1 != o2
         and
@@ -1382,7 +1369,7 @@ def segments_intersect(
         return True
 
 
-    # Collinear cases
+    # collinear
     if (
         o1 == 0
         and
@@ -1443,7 +1430,7 @@ def wires_are_connected(
     b_end = wire_b["end"]
 
 
-    # First check actual intersection
+    # check actual intersect
     if segments_intersect(
         a_start,
         a_end,
@@ -1453,8 +1440,7 @@ def wires_are_connected(
         return True
 
 
-    # Then allow small gaps caused by
-    # image processing / Hough detection
+    # allow small gaps
     distances = [
 
         point_to_segment_distance(
@@ -1631,7 +1617,7 @@ for index, wire in enumerate(
         )
 
 
-        # Ignore battery plates
+        # ignore battery plate
         if (
             length
             >
@@ -1843,9 +1829,6 @@ for item in ocr_items:
 
 # Attempt 2:
 # OCR may detect "9 V" as "'9".
-#
-# Find numeric OCR on LEFT HALF
-# near the middle of the circuit.
 if voltage_value is None:
 
     voltage_candidates = []
@@ -1858,12 +1841,12 @@ if voltage_value is None:
         )
 
 
-        # Ignore right-side resistor values
+        # ignore right side
         if cx >= width * 0.50:
             continue
 
 
-        # Ignore title
+        # ignore title
         if (
             "TEST IMAGE"
             in
@@ -1898,8 +1881,7 @@ if voltage_value is None:
 
     if voltage_candidates:
 
-        # Pick candidate closest to
-        # vertical center of circuit.
+        # Pick candidate closest to vertical center
         best_candidate = min(
 
             voltage_candidates,
@@ -1944,7 +1926,7 @@ print(
 netlist_lines = []
 
 
-# Voltage source
+# volt source
 netlist_lines.append(
 
     f"V1 "
@@ -1955,7 +1937,7 @@ netlist_lines.append(
 )
 
 
-# Resistors
+# resistors
 for resistor in resistor_connections:
 
     node1 = group_to_node[
